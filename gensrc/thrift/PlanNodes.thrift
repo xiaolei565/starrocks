@@ -338,9 +338,6 @@ struct THdfsScanRange {
 
     // paimon split info
     14: optional string paimon_split_info
-
-    // paimon predicate info
-    15: optional string paimon_predicate_info
 }
 
 struct TBinlogScanRange {

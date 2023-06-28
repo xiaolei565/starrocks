@@ -127,15 +127,14 @@ public interface ConnectorMetadata {
      * 1. Get the remote files information from hdfs or s3 according to table or partition.
      * 2. Get file scan tasks for iceberg metadata by query predicate.
      * @param table
-     * @param partitionKeys selected partition columns
-     * @param snapshotId selected snapshot id
+     * @param partitionKeys selected columns
      * @param predicate used to filter metadata for iceberg, etc
-     * @param fieldNames all selected columns (including partition columns)
+     * @param snapshotId selected snapshot id
      *
      * @return the remote file information of the query to scan.
      */
     default List<RemoteFileInfo> getRemoteFileInfos(Table table, List<PartitionKey> partitionKeys,
-                                                    long snapshotId, ScalarOperator predicate, List<String> fieldNames) {
+                                                    long snapshotId, ScalarOperator predicate) {
         return Lists.newArrayList();
     }
 

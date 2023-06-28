@@ -202,7 +202,7 @@ public class IcebergScanNode extends ScanNode {
         long snapshotId = snapshot.get().snapshotId();
 
         List<RemoteFileInfo> splits = GlobalStateMgr.getCurrentState().getMetadataMgr().getRemoteFileInfos(
-                catalogName, srIcebergTable, null, snapshotId, predicate, null);
+                catalogName, srIcebergTable, null, snapshotId, predicate);
 
         if (splits.isEmpty()) {
             LOG.warn("There is no scan tasks after planFies on {}.{} and predicate: [{}]",

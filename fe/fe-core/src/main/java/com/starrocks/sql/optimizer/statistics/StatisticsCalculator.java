@@ -27,7 +27,6 @@ import com.starrocks.catalog.Column;
 import com.starrocks.catalog.HiveMetaStoreTable;
 import com.starrocks.catalog.IcebergTable;
 import com.starrocks.catalog.OlapTable;
-import com.starrocks.catalog.PaimonTable;
 import com.starrocks.catalog.Partition;
 import com.starrocks.catalog.PartitionInfo;
 import com.starrocks.catalog.PartitionKey;
@@ -343,22 +342,23 @@ public class StatisticsCalculator extends OperatorVisitor<Void, ExpressionContex
 
     @Override
     public Void visitLogicalPaimonScan(LogicalPaimonScanOperator node, ExpressionContext context) {
-        return computePaimonScanNode(node, context, node.getTable(), node.getColRefToColumnMetaMap());
+        return computePaimonScanNode(node, context, node.getColRefToColumnMetaMap());
     }
 
     @Override
     public Void visitPhysicalPaimonScan(PhysicalPaimonScanOperator node, ExpressionContext context) {
-        return computePaimonScanNode(node, context, node.getTable(), node.getColRefToColumnMetaMap());
+        return computePaimonScanNode(node, context, node.getColRefToColumnMetaMap());
     }
 
-    private Void computePaimonScanNode(Operator node, ExpressionContext context, Table table,
+    private Void computePaimonScanNode(Operator node, ExpressionContext context,
                                        Map<ColumnRefOperator, Column> columnRefOperatorColumnMap) {
-        if (context.getStatistics() == null) {
-            String catalogName = ((PaimonTable) table).getCatalogName();
-            Statistics stats = GlobalStateMgr.getCurrentState().getMetadataMgr().getTableStatistics(
-                    optimizerContext, catalogName, table, columnRefOperatorColumnMap, null, node.getPredicate());
-            context.setStatistics(stats);
+        // Use default statistics for now.
+        Statistics.Builder builder = Statistics.builder();
+        for (ColumnRefOperator columnRefOperator : columnRefOperatorColumnMap.keySet()) {
+            builder.addColumnStatistic(columnRefOperator, ColumnStatistic.unknown());
         }
+        builder.setOutputRowCount(1);
+        context.setStatistics(builder.build());
 
         return visitOperator(node, context);
     }
