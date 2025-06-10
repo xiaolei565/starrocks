@@ -314,8 +314,11 @@ public class ImplicitCastRule extends TopDownScalarOperatorRewriteRule {
         }
 
         List<Type> types = predicate.getChildren().stream().map(ScalarOperator::getType).collect(Collectors.toList());
-        if (predicate.getChild(0).isVariable() && predicate.getChildren().stream().skip(1)
-                .allMatch(ScalarOperator::isConstantRef)) {
+        boolean theNextIsTimeOrIntegerType = predicate.getChildren().stream().skip(1)
+                        .allMatch(op -> (op.getType().isIntegerType() || op.getType().isDateType()));
+        // If the expression is "varchar BETWEEN int AND int", avoid using tryCastConstant function to prevent type mismatch
+        if (!(firstType.isVarchar() && theNextIsTimeOrIntegerType) && predicate.getChild(0)
+                .isVariable() && predicate.getChildren().stream().skip(1).allMatch(ScalarOperator::isConstantRef)) {
             List<ScalarOperator> newChild = Lists.newArrayList();
             newChild.add(predicate.getChild(0));
             for (int i = 1; i < types.size(); i++) {
